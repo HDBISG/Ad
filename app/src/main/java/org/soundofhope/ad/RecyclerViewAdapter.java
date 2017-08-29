@@ -24,6 +24,7 @@ import com.google.android.gms.ads.formats.NativeAppInstallAd;
 import com.google.android.gms.ads.formats.NativeAppInstallAdView;
 import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeContentAdView;
+import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
 
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,8 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // The Native  ad view type.
     private static final int NATIVE_CONTENT_AD_VIEW_TYPE = 1;
 
+    private static final int NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE = 2;
+
     private static final String DFP_AD_UNIT_ID = "/6499/example/native";
 
     private static final String SIMPLE_TEMPLATE_ID = "10104090";
@@ -50,6 +53,9 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final List<Object> mRecyclerViewItems;
 
     final static StringBuffer headLine = new StringBuffer();
+    final static StringBuffer templateHeadLine = new StringBuffer();
+    final static StringBuffer templateCaption = new StringBuffer();
+
     /**
      * For this example app, the recyclerViewItems list contains only
      * {@link MenuItem} and {@link NativeExpressAdView} types.
@@ -59,6 +65,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.mRecyclerViewItems = recyclerViewItems;
 
         this.initContent();
+        this.initNativeTemplate();
     }
 
     private void initContent() {
@@ -78,15 +85,33 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             }
         });
 
-        AdLoader adLoader = builder.withAdListener(new AdListener() {
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                System.out.println("Failed to load native ad: ");
+        AdLoader adLoader = builder.build();
 
-                Toast.makeText(mContext, "Failed to load native ad: "
-                        + errorCode, Toast.LENGTH_SHORT).show();
-            }
-        }).build();
+        adLoader.loadAd(new PublisherAdRequest.Builder().build());
+    }
+
+    private void initNativeTemplate(){
+
+        AdLoader.Builder builder = new AdLoader.Builder(mContext, DFP_AD_UNIT_ID);
+
+        builder.forCustomTemplateAd(SIMPLE_TEMPLATE_ID,
+                new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
+                    @Override
+                    public void onCustomTemplateAdLoaded(NativeCustomTemplateAd ad) {
+                        templateHeadLine.append( ad.getText("Headline") );
+                        templateCaption.append( ad.getText("Caption") );
+                    }
+                },
+                new NativeCustomTemplateAd.OnCustomClickListener() {
+                    @Override
+                    public void onCustomClick(NativeCustomTemplateAd ad, String s) {
+                        Toast.makeText(mContext,
+                                "A custom click has occurred in the simple template",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        AdLoader adLoader = builder.build();
 
         adLoader.loadAd(new PublisherAdRequest.Builder().build());
     }
@@ -124,6 +149,23 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
+    public class NativeCustomTemplateHolder extends RecyclerView.ViewHolder {
+
+        private TextView headline ;
+        private TextView caption ;
+
+        NativeCustomTemplateHolder(View view) {
+            super(view);
+
+            headline = (TextView) view.findViewById(R.id.simplecustom_headline);
+            caption = (TextView) view.findViewById(R.id.simplecustom_caption);
+        }
+        //headline.setText(nativeCustomTemplateAd.getText("Headline"));
+        //caption.setText(nativeCustomTemplateAd.getText("Caption"));
+    }
+
+
+
     @Override
     public int getItemCount() {
         return mRecyclerViewItems.size();
@@ -138,6 +180,9 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 : MENU_ITEM_VIEW_TYPE;*/
         if( position == 3 ) {
             return NATIVE_CONTENT_AD_VIEW_TYPE;
+        }
+        if( position == 6 ) {
+            return NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
         }
         return MENU_ITEM_VIEW_TYPE;
     }
@@ -162,6 +207,10 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         R.layout.ad_content, viewGroup, false);
                 return  new NativeContentAdViewHolder( nativeContentLayoutView );
                 // fall through
+            case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+                View adView = LayoutInflater.from(viewGroup.getContext())
+                        .inflate(R.layout.ad_simple_custom_template, viewGroup, false);
+                return  new NativeCustomTemplateHolder( adView );
             default:
                /* View nativeExpressLayoutView = LayoutInflater.from(
                         viewGroup.getContext()).inflate(R.layout.native_express_ad_container,
@@ -244,6 +293,12 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 //MenuItem menuItem = (MenuItem) mRecyclerViewItems.get(position);
                 // fall through\
                 //nativeContentAdViewHolder.menuHeadlineView.setText( "abc" );
+                break;
+            case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+
+                NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
+                nativeCustomTemplateHolder.headline.setText( templateHeadLine.toString() );
+                nativeCustomTemplateHolder.caption.setText( templateCaption.toString() );
                 break;
             default:
 
