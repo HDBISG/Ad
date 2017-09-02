@@ -39,9 +39,11 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private static final int MENU_ITEM_VIEW_TYPE = 0;
 
     // The Native  ad view type.
-    private static final int NATIVE_CONTENT_AD_VIEW_TYPE = 1;
+    private static final int NATIVE_EXPRESS_AD_VIEW_TYPE = 1;
 
-    private static final int NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE = 2;
+    private static final int NATIVE_CONTENT_AD_VIEW_TYPE = 2;
+
+    private static final int NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE = 3;
 
     private static final String DFP_AD_UNIT_ID = "/6499/example/native";
 
@@ -129,7 +131,12 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             menuItemSeq = (TextView) view.findViewById(R.id.menu_item_seq);
         }
     }
+    public class NativeExpressAdViewHolder extends RecyclerView.ViewHolder {
 
+        NativeExpressAdViewHolder(View view) {
+            super(view);
+        }
+    }
 
     public class NativeContentAdViewHolder extends RecyclerView.ViewHolder {
 
@@ -176,12 +183,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
      */
     @Override
     public int getItemViewType(int position) {
-        /*return (position % MainActivity.ITEMS_PER_AD == 0) ? NATIVE_EXPRESS_AD_VIEW_TYPE
-                : MENU_ITEM_VIEW_TYPE;*/
+
         if( position == 3 ) {
-            return NATIVE_CONTENT_AD_VIEW_TYPE;
+            return NATIVE_EXPRESS_AD_VIEW_TYPE;
         }
         if( position == 6 ) {
+            return NATIVE_CONTENT_AD_VIEW_TYPE;
+        }
+        if( position == 9 ) {
             return NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
         }
         return MENU_ITEM_VIEW_TYPE;
@@ -201,21 +210,25 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 menuItemLayoutView = LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.menu_item_container, viewGroup, false);
                 return new MenuItemViewHolder(menuItemLayoutView);
+
+            case NATIVE_EXPRESS_AD_VIEW_TYPE:
+                View nativeExpressLayoutView = LayoutInflater.from(
+                        viewGroup.getContext()).inflate(R.layout.native_express_ad_container,
+                        viewGroup, false);
+                return new NativeExpressAdViewHolder(nativeExpressLayoutView);
+
             case NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdView nativeContentLayoutView = (NativeContentAdView)LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.ad_content, viewGroup, false);
                 return  new NativeContentAdViewHolder( nativeContentLayoutView );
-                // fall through
+
             case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
                 View adView = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.ad_simple_custom_template, viewGroup, false);
+
                 return  new NativeCustomTemplateHolder( adView );
             default:
-               /* View nativeExpressLayoutView = LayoutInflater.from(
-                        viewGroup.getContext()).inflate(R.layout.native_express_ad_container,
-                        viewGroup, false);
-                return new NativeExpressAdViewHolder(nativeExpressLayoutView);*/
                 menuItemLayoutView = LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.menu_item_container, viewGroup, false);
                 return new MenuItemViewHolder(menuItemLayoutView);
@@ -284,6 +297,28 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 menuItemHolder.menuItemSeq.setText(menuItem.getSeq());
                 break;
 
+            case NATIVE_EXPRESS_AD_VIEW_TYPE:
+                NativeExpressAdViewHolder nativeExpressHolder =
+                        (NativeExpressAdViewHolder) holder;
+                NativeExpressAdView adView =
+                        (NativeExpressAdView) mRecyclerViewItems.get(position);
+                ViewGroup adCardView = (ViewGroup) nativeExpressHolder.itemView;
+                // The NativeExpressAdViewHolder recycled by the RecyclerView may be a different
+                // instance than the one used previously for this position. Clear the
+                // NativeExpressAdViewHolder of any subviews in case it has a different
+                // AdView associated with it, and make sure the AdView for this position doesn't
+                // already have a parent of a different recycled NativeExpressAdViewHolder.
+                if (adCardView.getChildCount() > 0) {
+                    adCardView.removeAllViews();
+                }
+                if (adView.getParent() != null) {
+                    ((ViewGroup) adView.getParent()).removeView(adView);
+                }
+
+                // Add the Native Express ad to the native express ad view.
+                adCardView.addView(adView);
+                break;
+
             case NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdViewHolder nativeContentAdViewHolder = (NativeContentAdViewHolder) holder;
@@ -294,12 +329,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 // fall through\
                 //nativeContentAdViewHolder.menuHeadlineView.setText( "abc" );
                 break;
+
             case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
 
                 NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
                 nativeCustomTemplateHolder.headline.setText( templateHeadLine.toString() );
                 nativeCustomTemplateHolder.caption.setText( templateCaption.toString() );
                 break;
+
             default:
 
                 MenuItemViewHolder menuItemHolder1 = (MenuItemViewHolder) holder;
