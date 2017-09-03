@@ -10,6 +10,9 @@ import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeContentAdView;
 import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by ok on 3/9/17.
  */
@@ -30,9 +33,15 @@ public class InitAd {
 
     public static final String SIMPLE_TEMPLATE_ID = "10104090";
 
-    public static final StringBuffer headLine = new StringBuffer();
-    public static final StringBuffer templateHeadLine = new StringBuffer();
-    public static final StringBuffer templateCaption = new StringBuffer();
+    //public static final StringBuffer headLine = new StringBuffer();
+    //public static final StringBuffer templateHeadLine = new StringBuffer();
+    //public static final StringBuffer templateCaption = new StringBuffer();
+    public static final String CONTENT_HEADLINE = "headLine";
+    public static final String NATIVE_TEMPLATE_HEADLINE = "headLine";
+    public static final String NATIVE_TEMPLATE_CAPTION = "caption";
+
+    public static final Map<String, Object> contentMap = new HashMap<String, Object>();
+    public static final Map<String, Object> nativeTemplateMap = new HashMap<String, Object>();
 
     // An Activity's Context.
     private final Context mContext;
@@ -58,10 +67,8 @@ public class InitAd {
 
                 NativeContentAdView adView = (NativeContentAdView) ((Activity)mContext).getLayoutInflater()
                         .inflate(R.layout.ad_content, null);
-                //populateContentAdView(ad, adView);
-                System.out.println( "11111111111" + ad.getHeadline() );
 
-                headLine.append( ad.getHeadline() );
+                contentMap.put( CONTENT_HEADLINE, ad.getHeadline() );
             }
         });
 
@@ -78,8 +85,8 @@ public class InitAd {
                 new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
                     @Override
                     public void onCustomTemplateAdLoaded(NativeCustomTemplateAd ad) {
-                        templateHeadLine.append( ad.getText("Headline") );
-                        templateCaption.append( ad.getText("Caption") );
+                        nativeTemplateMap.put( NATIVE_TEMPLATE_HEADLINE, ad.getText("Headline") );
+                        nativeTemplateMap.put( NATIVE_TEMPLATE_CAPTION, ad.getText("Caption") );
                     }
                 },
                 new NativeCustomTemplateAd.OnCustomClickListener() {
@@ -94,5 +101,15 @@ public class InitAd {
         AdLoader adLoader = builder.build();
 
         adLoader.loadAd(new PublisherAdRequest.Builder().build());
+    }
+
+    public static Object getContent( String key ) {
+        Object value = contentMap.get( key );
+        return value == null ? "": value;
+    }
+
+    public static Object getNativeTemplate( String key ) {
+        Object value = nativeTemplateMap.get( key );
+        return value == null ? "": value;
     }
 }

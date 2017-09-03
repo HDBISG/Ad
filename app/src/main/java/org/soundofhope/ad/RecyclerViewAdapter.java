@@ -259,7 +259,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
                 NativeContentAdViewHolder nativeContentAdViewHolder = (NativeContentAdViewHolder) holder;
 
-                nativeContentAdViewHolder.HeadlineView.setText( InitAd.headLine.toString() );
+                nativeContentAdViewHolder.HeadlineView.setText( InitAd.getContent(InitAd.CONTENT_HEADLINE).toString() );
                 //MenuItem menuItem = (MenuItem) mRecyclerViewItems.get(position);
                 // fall through\
                 //nativeContentAdViewHolder.menuHeadlineView.setText( "abc" );
@@ -268,8 +268,8 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             case InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
 
                 NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
-                nativeCustomTemplateHolder.headline.setText( InitAd.templateHeadLine.toString() );
-                nativeCustomTemplateHolder.caption.setText( InitAd.templateCaption.toString() );
+                nativeCustomTemplateHolder.headline.setText( InitAd.getNativeTemplate( InitAd.NATIVE_TEMPLATE_HEADLINE).toString() );
+                nativeCustomTemplateHolder.caption.setText( InitAd.getNativeTemplate( InitAd.NATIVE_TEMPLATE_CAPTION).toString() );
                 break;
 
             default:
