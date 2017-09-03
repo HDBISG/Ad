@@ -39,12 +39,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         addMenuItems();
+
+        // Admob
         addNativeExpressAds();
         setUpAndLoadNativeExpressAds();
+
+        // DFP
+        InitAd initAd = new InitAd( this );
+        initAd.initData();
 
         // Specify a linear layout manager.
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);

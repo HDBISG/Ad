@@ -35,28 +35,13 @@ import java.util.Locale;
  * or the {@link NativeContentAdViewHolder}.</p>
  */
 class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    // A menu item view type.
-    private static final int MENU_ITEM_VIEW_TYPE = 0;
 
-    // The Native  ad view type.
-    private static final int NATIVE_EXPRESS_AD_VIEW_TYPE = 1;
-
-    private static final int NATIVE_CONTENT_AD_VIEW_TYPE = 2;
-
-    private static final int NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE = 3;
-
-    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
-
-    private static final String SIMPLE_TEMPLATE_ID = "10104090";
     // An Activity's Context.
     private final Context mContext;
 
     // The list of Native Express ads and menu items.
     private final List<Object> mRecyclerViewItems;
 
-    final static StringBuffer headLine = new StringBuffer();
-    final static StringBuffer templateHeadLine = new StringBuffer();
-    final static StringBuffer templateCaption = new StringBuffer();
 
     /**
      * For this example app, the recyclerViewItems list contains only
@@ -66,57 +51,8 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.mContext = context;
         this.mRecyclerViewItems = recyclerViewItems;
 
-        this.initContent();
-        this.initNativeTemplate();
     }
 
-    private void initContent() {
-
-        AdLoader.Builder builder = new AdLoader.Builder( mContext, DFP_AD_UNIT_ID);
-
-        builder.forContentAd(new NativeContentAd.OnContentAdLoadedListener() {
-            @Override
-            public void onContentAdLoaded(NativeContentAd ad) {
-
-                NativeContentAdView adView = (NativeContentAdView) ((Activity)mContext).getLayoutInflater()
-                        .inflate(R.layout.ad_content, null);
-                //populateContentAdView(ad, adView);
-                System.out.println( "11111111111" + ad.getHeadline() );
-
-                headLine.append( ad.getHeadline() );
-            }
-        });
-
-        AdLoader adLoader = builder.build();
-
-        adLoader.loadAd(new PublisherAdRequest.Builder().build());
-    }
-
-    private void initNativeTemplate(){
-
-        AdLoader.Builder builder = new AdLoader.Builder(mContext, DFP_AD_UNIT_ID);
-
-        builder.forCustomTemplateAd(SIMPLE_TEMPLATE_ID,
-                new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
-                    @Override
-                    public void onCustomTemplateAdLoaded(NativeCustomTemplateAd ad) {
-                        templateHeadLine.append( ad.getText("Headline") );
-                        templateCaption.append( ad.getText("Caption") );
-                    }
-                },
-                new NativeCustomTemplateAd.OnCustomClickListener() {
-                    @Override
-                    public void onCustomClick(NativeCustomTemplateAd ad, String s) {
-                        Toast.makeText(mContext,
-                                "A custom click has occurred in the simple template",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        AdLoader adLoader = builder.build();
-
-        adLoader.loadAd(new PublisherAdRequest.Builder().build());
-    }
 
     /**
      * The {@link MenuItemViewHolder} class.
@@ -185,15 +121,15 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemViewType(int position) {
 
         if( position == 3 ) {
-            return NATIVE_EXPRESS_AD_VIEW_TYPE;
+            return InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE;
         }
         if( position == 6 ) {
-            return NATIVE_CONTENT_AD_VIEW_TYPE;
+            return InitAd.NATIVE_CONTENT_AD_VIEW_TYPE;
         }
         if( position == 9 ) {
-            return NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
+            return InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
         }
-        return MENU_ITEM_VIEW_TYPE;
+        return InitAd.MENU_ITEM_VIEW_TYPE;
     }
 
     /**
@@ -206,24 +142,24 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         View menuItemLayoutView = null;
 
         switch (viewType) {
-            case MENU_ITEM_VIEW_TYPE:
+            case InitAd.MENU_ITEM_VIEW_TYPE:
                 menuItemLayoutView = LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.menu_item_container, viewGroup, false);
                 return new MenuItemViewHolder(menuItemLayoutView);
 
-            case NATIVE_EXPRESS_AD_VIEW_TYPE:
+            case InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE:
                 View nativeExpressLayoutView = LayoutInflater.from(
                         viewGroup.getContext()).inflate(R.layout.native_express_ad_container,
                         viewGroup, false);
                 return new NativeExpressAdViewHolder(nativeExpressLayoutView);
 
-            case NATIVE_CONTENT_AD_VIEW_TYPE:
+            case InitAd.NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdView nativeContentLayoutView = (NativeContentAdView)LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.ad_content, viewGroup, false);
                 return  new NativeContentAdViewHolder( nativeContentLayoutView );
 
-            case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+            case InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
                 View adView = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.ad_simple_custom_template, viewGroup, false);
 
@@ -290,14 +226,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int viewType = getItemViewType(position);
 
         switch (viewType) {
-            case MENU_ITEM_VIEW_TYPE:
+            case InitAd.MENU_ITEM_VIEW_TYPE:
                 MenuItemViewHolder menuItemHolder = (MenuItemViewHolder) holder;
                 MenuItem menuItem = (MenuItem) mRecyclerViewItems.get(position);
 
                 menuItemHolder.menuItemSeq.setText(menuItem.getSeq());
                 break;
 
-            case NATIVE_EXPRESS_AD_VIEW_TYPE:
+            case InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE:
                 NativeExpressAdViewHolder nativeExpressHolder =
                         (NativeExpressAdViewHolder) holder;
                 NativeExpressAdView adView =
@@ -319,22 +255,21 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 adCardView.addView(adView);
                 break;
 
-            case NATIVE_CONTENT_AD_VIEW_TYPE:
+            case InitAd.NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdViewHolder nativeContentAdViewHolder = (NativeContentAdViewHolder) holder;
 
-                System.out.println( "2222222" + headLine.toString() );
-                nativeContentAdViewHolder.HeadlineView.setText( headLine.toString() );
+                nativeContentAdViewHolder.HeadlineView.setText( InitAd.headLine.toString() );
                 //MenuItem menuItem = (MenuItem) mRecyclerViewItems.get(position);
                 // fall through\
                 //nativeContentAdViewHolder.menuHeadlineView.setText( "abc" );
                 break;
 
-            case NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+            case InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
 
                 NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
-                nativeCustomTemplateHolder.headline.setText( templateHeadLine.toString() );
-                nativeCustomTemplateHolder.caption.setText( templateCaption.toString() );
+                nativeCustomTemplateHolder.headline.setText( InitAd.templateHeadLine.toString() );
+                nativeCustomTemplateHolder.caption.setText( InitAd.templateCaption.toString() );
                 break;
 
             default:
