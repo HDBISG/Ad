@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     adView.setAdSize(adSize);
                     adView.setAdUnitId(AD_UNIT_ID);
 
-                // Load the first Native Express ad in the items list.
+                // Load the 3 Native Express ad in the items list.
                 loadNativeExpressAd( 3 );
             }
         });
