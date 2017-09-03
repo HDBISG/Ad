@@ -2,6 +2,7 @@ package org.soundofhope.ad;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.StaticLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdLoader;
@@ -10,7 +11,9 @@ import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeContentAdView;
 import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,8 +43,11 @@ public class InitAd {
     public static final String NATIVE_TEMPLATE_HEADLINE = "headLine";
     public static final String NATIVE_TEMPLATE_CAPTION = "caption";
 
-    public static final Map<String, Object> contentMap = new HashMap<String, Object>();
-    public static final Map<String, Object> nativeTemplateMap = new HashMap<String, Object>();
+    private static int contentIdx = 0;
+    public static final List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
+
+    private static int nativeTemplateIdx = 0;
+    public static final List<Map<String, Object>> nativeTemplateList = new ArrayList<Map<String, Object>>();
 
     // An Activity's Context.
     private final Context mContext;
@@ -52,9 +58,12 @@ public class InitAd {
 
     public void initData() {
 
-        this.initContent();
-        this.initNativeTemplate();
+        //contentList.clear();
 
+        for (int i = 0; i < 4; i++) {
+            this.initContent();
+            this.initNativeTemplate();
+        }
     }
 
     private void initContent() {
@@ -68,7 +77,12 @@ public class InitAd {
                 NativeContentAdView adView = (NativeContentAdView) ((Activity)mContext).getLayoutInflater()
                         .inflate(R.layout.ad_content, null);
 
+                Map<String, Object> contentMap = new HashMap<String, Object>();
                 contentMap.put( CONTENT_HEADLINE, ad.getHeadline() );
+                addToContent( contentMap );
+
+                System.out.println( "contentMap" + contentMap + " contentList: " + contentList.size() +
+                            "  " + contentList );
             }
         });
 
@@ -85,8 +99,13 @@ public class InitAd {
                 new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
                     @Override
                     public void onCustomTemplateAdLoaded(NativeCustomTemplateAd ad) {
+
+                        Map<String, Object> nativeTemplateMap = new HashMap<String, Object>();
+
                         nativeTemplateMap.put( NATIVE_TEMPLATE_HEADLINE, ad.getText("Headline") );
                         nativeTemplateMap.put( NATIVE_TEMPLATE_CAPTION, ad.getText("Caption") );
+
+                        addToNativeTemplate( nativeTemplateMap );
                     }
                 },
                 new NativeCustomTemplateAd.OnCustomClickListener() {
@@ -103,13 +122,55 @@ public class InitAd {
         adLoader.loadAd(new PublisherAdRequest.Builder().build());
     }
 
-    public static Object getContent( String key ) {
-        Object value = contentMap.get( key );
-        return value == null ? "": value;
+    public static void addToContent( Map<String, Object> contentMap ) {
+
+        if( ! contentList.contains( contentMap )) {
+            contentList.add( contentMap );
+            return;
+
+        }
+    }
+    public static void addToNativeTemplate( Map<String, Object> nativeTemplateMap ) {
+
+        if( ! nativeTemplateList.contains( nativeTemplateMap )) {
+            nativeTemplateList.add( nativeTemplateMap );
+            return;
+        }
     }
 
-    public static Object getNativeTemplate( String key ) {
-        Object value = nativeTemplateMap.get( key );
-        return value == null ? "": value;
+    public static Map<String, Object> getContent(  ) {
+
+        System.out.println( "contentIdx=" + contentIdx + " contentList.size()=" + contentList.size() );
+
+        if( contentList.size() == 0 ) {
+            return null;
+        }
+        if( contentList.size() >= contentIdx ) {
+            contentIdx = 0;
+        }
+        Map<String, Object> content = contentList.get( contentIdx );
+        System.out.println( "contentIdx=" + contentIdx + " " + content );
+        contentIdx++;
+
+        return content ;
     }
+
+    public static Map<String, Object> getNativeTemplate(  ) {
+
+        System.out.println( "nativeTemplateIdx=" + nativeTemplateIdx
+                + " nativeTemplateList.size()=" + nativeTemplateList.size() );
+
+        if( nativeTemplateList.size() == 0 ) {
+            return null;
+        }
+        if( nativeTemplateList.size() >= nativeTemplateIdx ) {
+            nativeTemplateIdx = 0;
+        }
+        Map<String, Object> nativeTemplateMap = nativeTemplateList.get( nativeTemplateIdx );
+        System.out.println( "nativeTemplateIdx=" + nativeTemplateIdx + " " + nativeTemplateMap );
+        contentIdx++;
+
+        return nativeTemplateMap ;
+    }
+
 }
