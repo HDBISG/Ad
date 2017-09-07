@@ -13,7 +13,6 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.NativeExpressAdView;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setUpAndLoadNativeExpressAds();
 
         // DFP
-        InitAd initAd = new InitAd( this );
+        NativeAdManager initAd = new NativeAdManager( this );
         initAd.initData();
 
         // Specify a linear layout manager.

@@ -1,33 +1,20 @@
 package org.soundofhope.ad;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.NativeExpressAdView;
-import com.google.android.gms.ads.VideoController;
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.formats.MediaView;
 import com.google.android.gms.ads.formats.NativeAd;
-import com.google.android.gms.ads.formats.NativeAppInstallAd;
-import com.google.android.gms.ads.formats.NativeAppInstallAdView;
 import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeContentAdView;
-import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -122,15 +109,15 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemViewType(int position) {
 
         if( position == 3 ) {
-            return InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE;
+            return NativeAdManager.NATIVE_EXPRESS_AD_VIEW_TYPE;
         }
         if( position == 6 ) {
-            return InitAd.NATIVE_CONTENT_AD_VIEW_TYPE;
+            return NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE;
         }
         if( position == 9 ) {
-            return InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
+            return NativeAdManager.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
         }
-        return InitAd.MENU_ITEM_VIEW_TYPE;
+        return NativeAdManager.MENU_ITEM_VIEW_TYPE;
     }
 
     /**
@@ -143,24 +130,24 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         View menuItemLayoutView = null;
 
         switch (viewType) {
-            case InitAd.MENU_ITEM_VIEW_TYPE:
+            case NativeAdManager.MENU_ITEM_VIEW_TYPE:
                 menuItemLayoutView = LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.menu_item_container, viewGroup, false);
                 return new MenuItemViewHolder(menuItemLayoutView);
 
-            case InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_EXPRESS_AD_VIEW_TYPE:
                 View nativeExpressLayoutView = LayoutInflater.from(
                         viewGroup.getContext()).inflate(R.layout.native_express_ad_container,
                         viewGroup, false);
                 return new NativeExpressAdViewHolder(nativeExpressLayoutView);
 
-            case InitAd.NATIVE_CONTENT_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdView nativeContentLayoutView = (NativeContentAdView)LayoutInflater.from(viewGroup.getContext()).inflate(
                         R.layout.ad_content, viewGroup, false);
                 return  new NativeContentAdViewHolder( nativeContentLayoutView );
 
-            case InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
                 View adView = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.ad_simple_custom_template, viewGroup, false);
 
@@ -227,14 +214,14 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int viewType = getItemViewType(position);
 
         switch (viewType) {
-            case InitAd.MENU_ITEM_VIEW_TYPE:
+            case NativeAdManager.MENU_ITEM_VIEW_TYPE:
                 MenuItemViewHolder menuItemHolder = (MenuItemViewHolder) holder;
                 MenuItem menuItem = (MenuItem) mRecyclerViewItems.get(position);
 
                 menuItemHolder.menuItemSeq.setText(menuItem.getSeq());
                 break;
 
-            case InitAd.NATIVE_EXPRESS_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_EXPRESS_AD_VIEW_TYPE:
                 NativeExpressAdViewHolder nativeExpressHolder =
                         (NativeExpressAdViewHolder) holder;
                 NativeExpressAdView adView =
@@ -256,25 +243,25 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 adCardView.addView(adView);
                 break;
 
-            case InitAd.NATIVE_CONTENT_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdViewHolder nativeContentAdViewHolder = (NativeContentAdViewHolder) holder;
 
-                Map<String, Object> content = InitAd.getContent();
-                if( content != null && content.get(InitAd.CONTENT_HEADLINE)!= null ) {
-                    nativeContentAdViewHolder.HeadlineView.setText( content.get(InitAd.CONTENT_HEADLINE).toString());
+                Map<String, Object> content = NativeAdManager.getContent();
+                if( content != null && content.get(NativeAdManager.CONTENT_HEADLINE)!= null ) {
+                    nativeContentAdViewHolder.HeadlineView.setText( content.get(NativeAdManager.CONTENT_HEADLINE).toString());
                 }
 
                 break;
 
-            case InitAd.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
+            case NativeAdManager.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
 
                 NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
 
-                Map<String, Object> nativeTemplateMap = InitAd.getNativeTemplate();
-                if( nativeTemplateMap != null && nativeTemplateMap.get(InitAd.NATIVE_TEMPLATE_HEADLINE)!= null ) {
-                    nativeCustomTemplateHolder.headline.setText( nativeTemplateMap.get(InitAd.NATIVE_TEMPLATE_HEADLINE).toString());
-                    nativeCustomTemplateHolder.caption.setText( nativeTemplateMap.get(InitAd.NATIVE_TEMPLATE_CAPTION).toString());
+                Map<String, Object> nativeTemplateMap = NativeAdManager.getNativeTemplate();
+                if( nativeTemplateMap != null && nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE)!= null ) {
+                    nativeCustomTemplateHolder.headline.setText( nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE).toString());
+                    nativeCustomTemplateHolder.caption.setText( nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_CAPTION).toString());
                 }
                 break;
 
