@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by ok on 3/9/17.
  */
 
-public class InitAd {
+public class NativeAdManager {
 
     // A menu item view type.
     public static final int MENU_ITEM_VIEW_TYPE = 0;
@@ -52,7 +52,7 @@ public class InitAd {
     // An Activity's Context.
     private final Context mContext;
 
-    public InitAd( Context mContext ) {
+    public NativeAdManager(Context mContext ) {
         this.mContext = mContext;
     }
 
