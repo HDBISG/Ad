@@ -62,7 +62,7 @@ public class NativeAdManager {
     public void initAd() {
 
         new NativeAdManager.RefreshContent().addNew( 10 );
-        this.initNativeTemplate();
+        new NativeAdManager.RefreshNativeTemplate().addNew( 10 );
 
     }
 
@@ -197,6 +197,77 @@ public class NativeAdManager {
         }
     }
 
+
+    class RefreshNativeTemplate {
+
+        public int refreshAdNum = 10;
+
+        RefreshNativeTemplate( ) {
+        }
+
+        void addNew( int refreshAdNum ) {
+            this.refreshAdNum = refreshAdNum;
+            this.loadContent();
+        }
+
+        void refreshRendered() {
+
+            refreshAdNum = 0;
+
+            Iterator ite = adItemList.iterator();
+            if(ite.hasNext()) {
+                AdItem adItem = new AdItem();
+                if( (AdType.Content == adItem.adType) && adItem.isRenderd ) {
+                    ite.remove();
+                    refreshAdNum ++;
+                }
+            }
+            loadContent();
+        }
+
+        private void loadContent() {
+
+            AdLoader.Builder builder = new AdLoader.Builder(mContext, DFP_AD_UNIT_ID);
+
+            builder.forCustomTemplateAd(SIMPLE_TEMPLATE_ID,
+                    new NativeCustomTemplateAd.OnCustomTemplateAdLoadedListener() {
+                        @Override
+                        public void onCustomTemplateAdLoaded(NativeCustomTemplateAd ad) {
+
+                            Map<String, Object> nativeTemplateMap = new HashMap<String, Object>();
+
+                            nativeTemplateMap.put( NATIVE_TEMPLATE_HEADLINE, ad.getText("Headline") );
+                            nativeTemplateMap.put( NATIVE_TEMPLATE_CAPTION, ad.getText("Caption") );
+
+                            AdItem adItem = new AdItem();
+                            adItem.adType = AdType.NativeTemplate;
+                            adItem.adAttributesMap.putAll( nativeTemplateMap );
+                            addToAdList( adItem );
+
+                            refreshAdNum--;
+
+                            if( refreshAdNum > 0 ) {
+                                loadContent();
+                            } else {
+                                adSohListener.callback();
+                            }
+
+                        }
+                    },
+                    new NativeCustomTemplateAd.OnCustomClickListener() {
+                        @Override
+                        public void onCustomClick(NativeCustomTemplateAd ad, String s) {
+                            Toast.makeText(mContext,
+                                    "A custom click has occurred in the simple template",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+            AdLoader adLoader = builder.build();
+
+            adLoader.loadAd(new PublisherAdRequest.Builder().build());
+        }
+    }
 
 
 }

@@ -266,12 +266,16 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             case NativeAdManager.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE:
 
                 NativeCustomTemplateHolder nativeCustomTemplateHolder = (NativeCustomTemplateHolder) holder;
-                /*
-                Map<String, Object> nativeTemplateMap = NativeAdManager.getNativeTemplate();
-                if( nativeTemplateMap != null && nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE)!= null ) {
-                    nativeCustomTemplateHolder.headline.setText( nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE).toString());
-                    nativeCustomTemplateHolder.caption.setText( nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_CAPTION).toString());
-                }*/
+
+                AdItem adItemNativeTemplate = NativeAdManager.getAd( AdType.NativeTemplate, true );
+                if( adItemNativeTemplate != null ) {
+                    Map<String, Object> nativeTemplateMap = adItemNativeTemplate.adAttributesMap;
+
+                    if (nativeTemplateMap != null && nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE) != null) {
+                        nativeCustomTemplateHolder.headline.setText(nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_HEADLINE).toString());
+                        nativeCustomTemplateHolder.caption.setText(nativeTemplateMap.get(NativeAdManager.NATIVE_TEMPLATE_CAPTION).toString());
+                    }
+                }
                 break;
 
             default:
