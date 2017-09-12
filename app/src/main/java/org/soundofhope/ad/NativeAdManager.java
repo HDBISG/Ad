@@ -1,18 +1,16 @@
 package org.soundofhope.ad;
 
-import android.app.Activity;
 import android.content.Context;
-import android.text.StaticLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.formats.NativeContentAd;
-import com.google.android.gms.ads.formats.NativeContentAdView;
 import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,63 +30,45 @@ public class NativeAdManager {
 
     public static final int NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE = 3;
 
-    public static final String DFP_AD_UNIT_ID = "/6499/example/native";
 
-    public static final String SIMPLE_TEMPLATE_ID = "10104090";
-
-    //public static final StringBuffer headLine = new StringBuffer();
-    //public static final StringBuffer templateHeadLine = new StringBuffer();
-    //public static final StringBuffer templateCaption = new StringBuffer();
     public static final String CONTENT_HEADLINE = "headLine";
     public static final String NATIVE_TEMPLATE_HEADLINE = "headLine";
     public static final String NATIVE_TEMPLATE_CAPTION = "caption";
 
-    private static int contentIdx = 0;
-    public static final List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
 
-    private static int nativeTemplateIdx = 0;
-    public static final List<Map<String, Object>> nativeTemplateList = new ArrayList<Map<String, Object>>();
+    public static final List<AdItem> adItemList = new ArrayList<>();
+
+    private String DFP_AD_UNIT_ID = "";
+
+    private String SIMPLE_TEMPLATE_ID = "";
+
+    MainActivity.AdSohListener adSohListener = null;
 
     // An Activity's Context.
     private final Context mContext;
 
-    public NativeAdManager(Context mContext ) {
+    public NativeAdManager(Context mContext, String name, boolean nctaEnabled
+            , boolean refreshEnabled, Enum backfillType
+            , String adUnitDFP, String simpleTemplateId, String adUnitAdMod
+            , MainActivity.AdSohListener adSohListener ) {
+
         this.mContext = mContext;
+        this.SIMPLE_TEMPLATE_ID = simpleTemplateId;
+        this.DFP_AD_UNIT_ID = adUnitDFP;
+
+        this.adSohListener = adSohListener;
     }
 
-    public void initData() {
+    public void initAd() {
 
-        //contentList.clear();
+        new NativeAdManager.RefreshContent().addNew( 10 );
+        this.initNativeTemplate();
 
-        for (int i = 0; i < 4; i++) {
-            this.initContent();
-            this.initNativeTemplate();
-        }
     }
 
-    private void initContent() {
+    public void refreshAd() {
 
-        AdLoader.Builder builder = new AdLoader.Builder( mContext, DFP_AD_UNIT_ID);
-
-        builder.forContentAd(new NativeContentAd.OnContentAdLoadedListener() {
-            @Override
-            public void onContentAdLoaded(NativeContentAd ad) {
-
-                NativeContentAdView adView = (NativeContentAdView) ((Activity)mContext).getLayoutInflater()
-                        .inflate(R.layout.ad_content, null);
-
-                Map<String, Object> contentMap = new HashMap<String, Object>();
-                contentMap.put( CONTENT_HEADLINE, ad.getHeadline() );
-                addToContent( contentMap );
-
-                System.out.println( "contentMap" + contentMap + " contentList: " + contentList.size() +
-                            "  " + contentList );
-            }
-        });
-
-        AdLoader adLoader = builder.build();
-
-        adLoader.loadAd(new PublisherAdRequest.Builder().build());
+        new NativeAdManager.RefreshContent().refreshRendered();
     }
 
     private void initNativeTemplate(){
@@ -105,7 +85,6 @@ public class NativeAdManager {
                         nativeTemplateMap.put( NATIVE_TEMPLATE_HEADLINE, ad.getText("Headline") );
                         nativeTemplateMap.put( NATIVE_TEMPLATE_CAPTION, ad.getText("Caption") );
 
-                        addToNativeTemplate( nativeTemplateMap );
                     }
                 },
                 new NativeCustomTemplateAd.OnCustomClickListener() {
@@ -122,55 +101,102 @@ public class NativeAdManager {
         adLoader.loadAd(new PublisherAdRequest.Builder().build());
     }
 
-    public static void addToContent( Map<String, Object> contentMap ) {
+    public static void addToAdList( AdItem adItem ) {
 
-        if( ! contentList.contains( contentMap )) {
-            contentList.add( contentMap );
-            return;
-
-        }
-    }
-    public static void addToNativeTemplate( Map<String, Object> nativeTemplateMap ) {
-
-        if( ! nativeTemplateList.contains( nativeTemplateMap )) {
-            nativeTemplateList.add( nativeTemplateMap );
-            return;
-        }
+        adItemList.add( adItem );
     }
 
-    public static Map<String, Object> getContent(  ) {
+    public static AdItem getAd( int idx, boolean render ) {
 
-        System.out.println( "contentIdx=" + contentIdx + " contentList.size()=" + contentList.size() );
-
-        if( contentList.size() == 0 ) {
-            return null;
+        if( adItemList != null && idx < adItemList.size() ) {
+            AdItem adItem = adItemList.get( idx );
+            if( render ) {
+                adItem.isRenderd = true;
+            }
+            return adItem;
         }
-        if( contentList.size() >= contentIdx ) {
-            contentIdx = 0;
-        }
-        Map<String, Object> content = contentList.get( contentIdx );
-        System.out.println( "contentIdx=" + contentIdx + " " + content );
-        contentIdx++;
-
-        return content ;
+        return null;
     }
 
-    public static Map<String, Object> getNativeTemplate(  ) {
+    public static AdItem getAd( AdType adType, boolean render ) {
 
-        System.out.println( "nativeTemplateIdx=" + nativeTemplateIdx
-                + " nativeTemplateList.size()=" + nativeTemplateList.size() );
+        for( AdItem adItem: adItemList ) {
 
-        if( nativeTemplateList.size() == 0 ) {
-            return null;
+            if( adItem.isRenderd ) {
+                continue;
+            }
+            if( adItem.adType == adType ) {
+                if (render) {
+                    adItem.isRenderd = true;
+                }
+                return adItem;
+            }
         }
-        if( nativeTemplateList.size() >= nativeTemplateIdx ) {
-            nativeTemplateIdx = 0;
-        }
-        Map<String, Object> nativeTemplateMap = nativeTemplateList.get( nativeTemplateIdx );
-        System.out.println( "nativeTemplateIdx=" + nativeTemplateIdx + " " + nativeTemplateMap );
-        contentIdx++;
-
-        return nativeTemplateMap ;
+        return null;
     }
+
+    class RefreshContent {
+
+        public int refreshAdNum = 10;
+
+        RefreshContent( ) {
+        }
+
+        void addNew( int refreshAdNum ) {
+            this.refreshAdNum = refreshAdNum;
+            this.loadContent();
+        }
+
+        void refreshRendered() {
+
+            refreshAdNum = 0;
+
+            Iterator ite = adItemList.iterator();
+            if(ite.hasNext()) {
+                AdItem adItem = new AdItem();
+                if( (AdType.Content == adItem.adType) && adItem.isRenderd ) {
+                    ite.remove();
+                    refreshAdNum ++;
+                }
+            }
+            loadContent();
+        }
+
+        private void loadContent() {
+
+            AdLoader.Builder builder = new AdLoader.Builder( mContext, DFP_AD_UNIT_ID);
+
+            builder.forContentAd(new NativeContentAd.OnContentAdLoadedListener() {
+                @Override
+                public void onContentAdLoaded(NativeContentAd ad) {
+
+                    Map<String, Object> contentMap = new HashMap<String, Object>();
+
+                    contentMap.put( CONTENT_HEADLINE, ad.getHeadline() );
+
+                    AdItem adItem = new AdItem();
+                    adItem.adType = AdType.Content;
+                    adItem.adAttributesMap.putAll( contentMap );
+                    addToAdList( adItem );
+
+                    refreshAdNum--;
+
+                    if( refreshAdNum > 0 ) {
+                        loadContent();
+                    } else {
+                        adSohListener.callback();
+                    }
+
+                    System.out.println( "contentMap" + contentMap + " adItemList: " + adItemList.size() );
+                }
+            });
+
+            AdLoader adLoader = builder.build();
+
+            adLoader.loadAd(new PublisherAdRequest.Builder().build());
+        }
+    }
+
+
 
 }

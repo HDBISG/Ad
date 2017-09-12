@@ -30,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
     // The Native Express ad unit ID.
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1072772517";
 
+    public static final String DFP_AD_UNIT_ID = "/6499/example/native";
+
+    public static final String SIMPLE_TEMPLATE_ID = "10104090";
+
     // List of Native Express ads and MenuItems that populate the RecyclerView.
     private List<Object> mRecyclerViewItems = new ArrayList<>();
 
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
+        final RecyclerView.Adapter adapter = new RecyclerViewAdapter(this, mRecyclerViewItems);
+
         addMenuItems();
 
         // Admob
@@ -47,15 +53,21 @@ public class MainActivity extends AppCompatActivity {
         setUpAndLoadNativeExpressAds();
 
         // DFP
-        NativeAdManager initAd = new NativeAdManager( this );
-        initAd.initData();
+        NativeAdManager nativeAdManager = new NativeAdManager( this,"name",true, true
+                , null, DFP_AD_UNIT_ID, SIMPLE_TEMPLATE_ID, AD_UNIT_ID,
+                new MainActivity.AdSohListener(){
+                    @Override
+                    public void callback( ){
+                        adapter.notifyDataSetChanged();
+                    }
+                } );
+        nativeAdManager.initAd();
 
         // Specify a linear layout manager.
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
 
         // Specify an adapter.
-        RecyclerView.Adapter adapter = new RecyclerViewAdapter(this, mRecyclerViewItems);
         mRecyclerView.setAdapter(adapter);
 
     }
@@ -141,5 +153,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Load the Native Express ad.
         adView.loadAd(new AdRequest.Builder().build());
+    }
+
+    public interface AdSohListener {
+
+        public void callback( );
     }
 }
