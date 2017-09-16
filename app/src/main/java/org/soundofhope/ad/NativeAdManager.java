@@ -56,6 +56,8 @@ public class NativeAdManager {
             , String adUnitDFP, String simpleTemplateId, String adUnitAdMod
             , MainActivity.AdSohListener adSohListener ) {
 
+        adItemList.clear();
+
         this.mContext = mContext;
         this.SIMPLE_TEMPLATE_ID = simpleTemplateId;
         this.DFP_AD_UNIT_ID = adUnitDFP;
@@ -63,14 +65,13 @@ public class NativeAdManager {
         this.adSohListener = adSohListener;
     }
 
-    public void initAd() {
+    public void appendAdList() {
 
-        adItemList.clear();
-        initAdViaType( AdType.NativeTemplate );
+        appendAdListViaType( AdType.NativeTemplate );
 
     }
 
-    public void initAdViaType( AdType adType ) {
+    public void appendAdListViaType( AdType adType ) {
 
         switch (adType) {
             case NativeTemplate:
@@ -282,7 +283,7 @@ public class NativeAdManager {
                                 // refresh RecyclerViewlist;
                                 adSohListener.callback();
                                 //
-                                initAdViaType(AdType.Content);
+                                appendAdListViaType(AdType.Content);
                             }
 
                         }
