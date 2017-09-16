@@ -44,7 +44,7 @@ public class NativeAdManager {
 
     public static final List<AdItem> adItemList = new ArrayList<>();
 
-    static List<NativeExpressAdView> nativeExpressAdViewList = new ArrayList<>();
+    //static List<NativeExpressAdView> nativeExpressAdViewList = new ArrayList<>();
 
     private String DFP_AD_UNIT_ID = "";
 
@@ -72,13 +72,15 @@ public class NativeAdManager {
 
         this.adSohListener = adSohListener;
 
-        loadNativeExpressAd();
     }
 
     public void appendAdList() {
 
         appendAdListViaType( AdType.NativeTemplate );
 
+        for( int i=0; i< 5; i++ ) {
+            loadNativeExpressAd();
+        }
     }
 
     public void appendAdListViaType( AdType adType ) {
@@ -231,7 +233,17 @@ public class NativeAdManager {
         // Load the Native Express ad.
         adView.loadAd(new AdRequest.Builder().build());
 
-        nativeExpressAdViewList.add( adView );
+        //nativeExpressAdViewList.add( adView );
+        Map<String, Object> adMobMap = new HashMap<String, Object>();
+
+        adMobMap.put( "view", adView );
+
+        AdItem adItem = new AdItem();
+        adItem.adType = AdType.AdMob;
+        adItem.adAttributesMap.putAll( adMobMap );
+
+        adItemList.add( adItem );
+
     }
     class RefreshContent {
 

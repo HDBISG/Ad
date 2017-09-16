@@ -230,34 +230,39 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         (NativeExpressAdViewHolder) holder;
                 /*NativeExpressAdView adView =
                         (NativeExpressAdView) mRecyclerViewItems.get(position);*/
-                NativeExpressAdView adView =
-                        NativeAdManager.nativeExpressAdViewList.get( 0 );
 
-                ViewGroup adCardView = (ViewGroup) nativeExpressHolder.itemView;
-                // The NativeExpressAdViewHolder recycled by the RecyclerView may be a different
-                // instance than the one used previously for this position. Clear the
-                // NativeExpressAdViewHolder of any subviews in case it has a different
-                // AdView associated with it, and make sure the AdView for this position doesn't
-                // already have a parent of a different recycled NativeExpressAdViewHolder.
-                if (adCardView.getChildCount() > 0) {
-                    adCardView.removeAllViews();
-                }
-                if (adView.getParent() != null) {
-                    ((ViewGroup) adView.getParent()).removeView(adView);
-                }
+                AdItem adItem = NativeAdManager.getAd( AdType.AdMob, true );
 
-                // Add the Native Express ad to the native express ad view.
-                adCardView.addView(adView);
+                if( adItem != null ) {
+                    NativeExpressAdView adView
+                        = (NativeExpressAdView)adItem.adAttributesMap.get("view");
+
+                    ViewGroup adCardView = (ViewGroup) nativeExpressHolder.itemView;
+                    // The NativeExpressAdViewHolder recycled by the RecyclerView may be a different
+                    // instance than the one used previously for this position. Clear the
+                    // NativeExpressAdViewHolder of any subviews in case it has a different
+                    // AdView associated with it, and make sure the AdView for this position doesn't
+                    // already have a parent of a different recycled NativeExpressAdViewHolder.
+                    if (adCardView.getChildCount() > 0) {
+                        adCardView.removeAllViews();
+                    }
+                    if (adView.getParent() != null) {
+                        ((ViewGroup) adView.getParent()).removeView(adView);
+                    }
+
+                    // Add the Native Express ad to the native express ad view.
+                    adCardView.addView(adView);
+                }
                 break;
 
             case NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE:
 
                 NativeContentAdViewHolder nativeContentAdViewHolder = (NativeContentAdViewHolder) holder;
 
-                AdItem adItem = NativeAdManager.getAd( AdType.Content, true );
+                AdItem adItemNativeContent = NativeAdManager.getAd( AdType.Content, true );
 
-                if( adItem != null ) {
-                    Map<String, Object> content = adItem.adAttributesMap;
+                if( adItemNativeContent != null ) {
+                    Map<String, Object> content = adItemNativeContent.adAttributesMap;
 
                     if (content != null && content.get(NativeAdManager.CONTENT_HEADLINE) != null) {
                         nativeContentAdViewHolder.HeadlineView.setText(content.get(NativeAdManager.CONTENT_HEADLINE).toString());
