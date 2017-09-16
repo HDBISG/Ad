@@ -44,6 +44,10 @@ public class NativeAdManager {
 
     MainActivity.AdSohListener adSohListener = null;
 
+    static int m = 30;
+    static int k = 10;
+    static int d = 3;
+
     // An Activity's Context.
     private final Context mContext;
 
@@ -61,8 +65,25 @@ public class NativeAdManager {
 
     public void initAd() {
 
-        new NativeAdManager.RefreshContent().addNew( 10 );
-        new NativeAdManager.RefreshNativeTemplate().addNew( 10 );
+        adItemList.clear();
+        initAdViaType( AdType.NativeTemplate );
+
+    }
+
+    public void initAdViaType( AdType adType ) {
+
+        switch (adType) {
+            case NativeTemplate:
+                new NativeAdManager.RefreshNativeTemplate().addNew( m );
+                break;
+            case AppInstall:
+                break;
+            case Content:
+                new NativeAdManager.RefreshContent().addNew( k );
+                break;
+            case AdMob:
+                break;
+        }
 
     }
 
@@ -101,11 +122,6 @@ public class NativeAdManager {
         adLoader.loadAd(new PublisherAdRequest.Builder().build());
     }
 
-    public static void addToAdList( AdItem adItem ) {
-
-        adItemList.add( adItem );
-    }
-
     public static AdItem getAd( int idx, boolean render ) {
 
         if( adItemList != null && idx < adItemList.size() ) {
@@ -138,12 +154,14 @@ public class NativeAdManager {
     class RefreshContent {
 
         public int refreshAdNum = 10;
+        boolean isAddNew = true;
 
         RefreshContent( ) {
         }
 
         void addNew( int refreshAdNum ) {
             this.refreshAdNum = refreshAdNum;
+            isAddNew = true;
             this.loadContent();
         }
 
@@ -177,7 +195,12 @@ public class NativeAdManager {
                     AdItem adItem = new AdItem();
                     adItem.adType = AdType.Content;
                     adItem.adAttributesMap.putAll( contentMap );
-                    addToAdList( adItem );
+
+                    if( isAddNew ) {
+                        if( ! addToAdList(adItem) ) {
+                            refreshAdNum = 0;
+                        }
+                    }
 
                     refreshAdNum--;
 
@@ -201,12 +224,14 @@ public class NativeAdManager {
     class RefreshNativeTemplate {
 
         public int refreshAdNum = 10;
+        boolean isAddNew = true;
 
         RefreshNativeTemplate( ) {
         }
 
         void addNew( int refreshAdNum ) {
             this.refreshAdNum = refreshAdNum;
+            isAddNew = true;
             this.loadContent();
         }
 
@@ -242,14 +267,22 @@ public class NativeAdManager {
                             AdItem adItem = new AdItem();
                             adItem.adType = AdType.NativeTemplate;
                             adItem.adAttributesMap.putAll( nativeTemplateMap );
-                            addToAdList( adItem );
 
                             refreshAdNum--;
+                            if( isAddNew ) {
+                                if( ! addToAdList(adItem)) {
+                                    // add failed;
+                                    refreshAdNum = 0;
+                                }
+                            }
 
                             if( refreshAdNum > 0 ) {
                                 loadContent();
                             } else {
+                                // refresh RecyclerViewlist;
                                 adSohListener.callback();
+                                //
+                                initAdViaType(AdType.Content);
                             }
 
                         }
@@ -269,5 +302,56 @@ public class NativeAdManager {
         }
     }
 
+
+
+    private static boolean addToAdList( AdItem adItem ) {
+        if( isSameDtimes( adItem ) ) {
+            return false;
+        }
+
+        if( isRepeatKtimes( adItem )) {
+            return false;
+        }
+
+        adItemList.add( adItem );
+        return true;
+    }
+
+    private static boolean isRepeatKtimes( AdItem adItem ) {
+        int repeatTimes = 0;
+        for (AdItem adItemTemp: adItemList ) {
+
+            if( adItemTemp.isRenderd ) {
+                continue;
+            }
+            if( adItem.equals( adItemTemp)) {
+                repeatTimes++;
+            }
+            if( repeatTimes >= k ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isSameDtimes( AdItem adItem ) {
+
+        if (adItemList.size() < d) {
+            return false;
+        }
+        int sameTimes = 0;
+        for( int i = adItemList.size()-1; i>=0; i-- ) {
+            AdItem adItemTemp = adItemList.get( i );
+            if( adItemTemp.equals( adItem ) ) {
+                sameTimes ++;
+            } else {
+                return false;
+            }
+            if(sameTimes >= d ) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

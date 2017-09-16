@@ -18,4 +18,22 @@ public class AdItem implements Serializable {
     // ad attributes;
     Map<String, Object> adAttributesMap = new HashMap<>();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AdItem adItem = (AdItem) o;
+
+        if (adType != adItem.adType) return false;
+        return adAttributesMap.equals(adItem.adAttributesMap);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = adType.hashCode();
+        result = 31 * result + adAttributesMap.hashCode();
+        return result;
+    }
 }
