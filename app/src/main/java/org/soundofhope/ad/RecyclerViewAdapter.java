@@ -110,15 +110,15 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
 
 
-        if( position%5 == 2 ) {
+        if( position %5 == 2 ) {
             return NativeAdManager.NATIVE_EXPRESS_AD_VIEW_TYPE;
         }
 
-        if( position%5 == 3 ) {
+        if( position %5 == 3 ) {
             return NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE;
         }
 
-        if( position%5 == 4 ) {
+        if( position %5 == 4 ) {
             return NativeAdManager.NATIVE_CUSTOM_TEMPLATE_AD_VIEW_TYPE;
         }
         return NativeAdManager.MENU_ITEM_VIEW_TYPE;
@@ -228,8 +228,11 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             case NativeAdManager.NATIVE_EXPRESS_AD_VIEW_TYPE:
                 NativeExpressAdViewHolder nativeExpressHolder =
                         (NativeExpressAdViewHolder) holder;
-               /* NativeExpressAdView adView =
-                        (NativeExpressAdView) mRecyclerViewItems.get(position);
+                /*NativeExpressAdView adView =
+                        (NativeExpressAdView) mRecyclerViewItems.get(position);*/
+                NativeExpressAdView adView =
+                        NativeAdManager.nativeExpressAdViewList.get( 0 );
+
                 ViewGroup adCardView = (ViewGroup) nativeExpressHolder.itemView;
                 // The NativeExpressAdViewHolder recycled by the RecyclerView may be a different
                 // instance than the one used previously for this position. Clear the
@@ -244,7 +247,7 @@ class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
 
                 // Add the Native Express ad to the native express ad view.
-                adCardView.addView(adView);*/
+                adCardView.addView(adView);
                 break;
 
             case NativeAdManager.NATIVE_CONTENT_AD_VIEW_TYPE:

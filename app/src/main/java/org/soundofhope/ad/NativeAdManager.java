@@ -1,9 +1,15 @@
 package org.soundofhope.ad;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.formats.NativeContentAd;
 import com.google.android.gms.ads.formats.NativeCustomTemplateAd;
@@ -24,7 +30,7 @@ public class NativeAdManager {
     public static final int MENU_ITEM_VIEW_TYPE = 0;
 
     // The Native  ad view type.
-    public static final int NATIVE_EXPRESS_AD_VIEW_TYPE = 1;
+    public static final int NATIVE_EXPRESS_AD_VIEW_TYPE = 1;  // admob;
 
     public static final int NATIVE_CONTENT_AD_VIEW_TYPE = 2;
 
@@ -37,6 +43,8 @@ public class NativeAdManager {
 
 
     public static final List<AdItem> adItemList = new ArrayList<>();
+
+    static List<NativeExpressAdView> nativeExpressAdViewList = new ArrayList<>();
 
     private String DFP_AD_UNIT_ID = "";
 
@@ -63,6 +71,8 @@ public class NativeAdManager {
         this.DFP_AD_UNIT_ID = adUnitDFP;
 
         this.adSohListener = adSohListener;
+
+        loadNativeExpressAd();
     }
 
     public void appendAdList() {
@@ -75,12 +85,12 @@ public class NativeAdManager {
 
         switch (adType) {
             case NativeTemplate:
-                new NativeAdManager.RefreshNativeTemplate().addNew( m );
+                new RefreshNativeTemplate().addNew( m );
                 break;
             case AppInstall:
                 break;
             case Content:
-                new NativeAdManager.RefreshContent().addNew( k );
+                new RefreshContent().addNew( k );
                 break;
             case AdMob:
                 break;
@@ -88,9 +98,29 @@ public class NativeAdManager {
 
     }
 
-    public void refreshAd() {
+    public void refreshRenderdAd() {
 
-        new NativeAdManager.RefreshContent().refreshRendered();
+        for( int i=0; i<adItemList.size(); i++ ) {
+
+            AdItem adItem =  adItemList.get( i );
+
+            if( adItem.isRenderd ) {
+                switch (adItem.adType) {
+                    case NativeTemplate:
+                        new RefreshNativeTemplate().refreshRendered( i );
+                        break;
+                    case AppInstall:
+                        break;
+                    case Content:
+                        new RefreshContent().refreshRendered( i );
+                        break;
+                    case AdMob:
+                        break;
+                }
+                //一次仅一个，完成后再刷新第二个。
+                break;
+            }
+        }
     }
 
     private void initNativeTemplate(){
@@ -152,32 +182,65 @@ public class NativeAdManager {
         return null;
     }
 
+
+    private void loadNativeExpressAd( ) {
+
+
+
+        final NativeExpressAdView adView = new NativeExpressAdView( mContext );
+
+        int adWidth = 736;
+
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+
+        AdSize adSize = new AdSize((int) (adWidth / scale), MainActivity.NATIVE_EXPRESS_AD_HEIGHT);
+        adView.setAdSize(adSize);
+        adView.setAdUnitId( MainActivity.AD_UNIT_ID);
+
+        // Set an AdListener on the NativeExpressAdView to wait for the previous Native Express ad
+        // to finish loading before loading the next ad in the items list.
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                // The previous Native Express ad loaded successfully, call this method again to
+                // load the next ad in the items list.
+                //loadNativeExpressAd(index + ITEMS_PER_AD);
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                // The previous Native Express ad failed to load. Call this method again to load
+                // the next ad in the items list.
+                Log.e("MainActivity", "The previous Native Express ad failed to load. Attempting to"
+                        + " load the next Native Express ad in the items list.");
+                //loadNativeExpressAd(index + ITEMS_PER_AD);
+            }
+        });
+
+        // Load the Native Express ad.
+        adView.loadAd(new AdRequest.Builder().build());
+
+        nativeExpressAdViewList.add( adView );
+    }
     class RefreshContent {
 
-        public int refreshAdNum = 10;
         boolean isAddNew = true;
+        public int refreshAdNum = 10;
+        int idx = 0;
 
         RefreshContent( ) {
         }
 
         void addNew( int refreshAdNum ) {
-            this.refreshAdNum = refreshAdNum;
             isAddNew = true;
+            this.refreshAdNum = refreshAdNum;
             this.loadContent();
         }
 
-        void refreshRendered() {
-
-            refreshAdNum = 0;
-
-            Iterator ite = adItemList.iterator();
-            if(ite.hasNext()) {
-                AdItem adItem = new AdItem();
-                if( (AdType.Content == adItem.adType) && adItem.isRenderd ) {
-                    ite.remove();
-                    refreshAdNum ++;
-                }
-            }
+        void refreshRendered( int idx ) {
+            isAddNew = false;
+            this.idx = idx;
             loadContent();
         }
 
@@ -198,19 +261,20 @@ public class NativeAdManager {
                     adItem.adAttributesMap.putAll( contentMap );
 
                     if( isAddNew ) {
+
+                        refreshAdNum--;
                         if( ! addToAdList(adItem) ) {
                             refreshAdNum = 0;
                         }
-                    }
-
-                    refreshAdNum--;
-
-                    if( refreshAdNum > 0 ) {
-                        loadContent();
+                        if( refreshAdNum > 0 ) {
+                            loadContent();
+                        } else {
+                            adSohListener.callback();
+                        }
                     } else {
-                        adSohListener.callback();
+                        adItemList.set(idx, adItem);
+                        refreshRenderdAd();
                     }
-
                     System.out.println( "contentMap" + contentMap + " adItemList: " + adItemList.size() );
                 }
             });
@@ -224,30 +288,23 @@ public class NativeAdManager {
 
     class RefreshNativeTemplate {
 
-        public int refreshAdNum = 10;
         boolean isAddNew = true;
+        public int refreshAdNum = 10;
+        int idx;
 
         RefreshNativeTemplate( ) {
         }
 
         void addNew( int refreshAdNum ) {
-            this.refreshAdNum = refreshAdNum;
             isAddNew = true;
+            this.refreshAdNum = refreshAdNum;
             this.loadContent();
         }
 
-        void refreshRendered() {
+        void refreshRendered( int idx ) {
 
-            refreshAdNum = 0;
-
-            Iterator ite = adItemList.iterator();
-            if(ite.hasNext()) {
-                AdItem adItem = new AdItem();
-                if( (AdType.Content == adItem.adType) && adItem.isRenderd ) {
-                    ite.remove();
-                    refreshAdNum ++;
-                }
-            }
+            isAddNew = false;
+            this.idx = idx;
             loadContent();
         }
 
@@ -269,21 +326,24 @@ public class NativeAdManager {
                             adItem.adType = AdType.NativeTemplate;
                             adItem.adAttributesMap.putAll( nativeTemplateMap );
 
-                            refreshAdNum--;
                             if( isAddNew ) {
+                                refreshAdNum--;
                                 if( ! addToAdList(adItem)) {
                                     // add failed;
                                     refreshAdNum = 0;
                                 }
-                            }
 
-                            if( refreshAdNum > 0 ) {
-                                loadContent();
+                                if( refreshAdNum > 0 ) {
+                                    loadContent();
+                                } else {
+                                    // refresh RecyclerViewlist;
+                                    adSohListener.callback();
+                                    //
+                                    appendAdListViaType(AdType.Content);
+                                }
                             } else {
-                                // refresh RecyclerViewlist;
-                                adSohListener.callback();
-                                //
-                                appendAdListViaType(AdType.Content);
+                                adItemList.set(idx, adItem);
+                                refreshRenderdAd();
                             }
 
                         }

@@ -6,10 +6,14 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.NativeExpressAdView;
 
 
@@ -24,18 +28,25 @@ public class MainActivity extends AppCompatActivity {
     // The RecyclerView that holds and displays Native Express ads and menu items.
     private RecyclerView mRecyclerView;
 
+    private Button addMoreBtn;
+
+    private Button refreshRenderdMore;
+
     // The Native Express ad height.
-    private static final int NATIVE_EXPRESS_AD_HEIGHT = 150;
+    public static final int NATIVE_EXPRESS_AD_HEIGHT = 150;
 
     // The Native Express ad unit ID.
-    private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1072772517";
+    public static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1072772517";
 
     public static final String DFP_AD_UNIT_ID = "/6499/example/native";
 
     public static final String SIMPLE_TEMPLATE_ID = "10104090";
 
     // List of Native Express ads and MenuItems that populate the RecyclerView.
-    private List<Object> mRecyclerViewItems = new ArrayList<>();
+    public final List<Object> mRecyclerViewItems = new ArrayList<>();
+
+
+    NativeAdManager nativeAdManager = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,25 +54,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        addMoreBtn = (Button)findViewById( R.id.addMoreBtn);
+        refreshRenderdMore = (Button)findViewById( R.id.refreshRenderdMore);
 
         final RecyclerView.Adapter adapter = new RecyclerViewAdapter(this, mRecyclerViewItems);
 
-        addMenuItems();
+        addMenuItems( 20 );
 
         // Admob
-        addNativeExpressAds();
-        setUpAndLoadNativeExpressAds();
+        //addNativeExpressAds();
+        //setUpAndLoadNativeExpressAds();
 
         // DFP
-        NativeAdManager nativeAdManager = new NativeAdManager( this,"name",true, true
+        nativeAdManager = new NativeAdManager( this,"name",true, true
                 , null, DFP_AD_UNIT_ID, SIMPLE_TEMPLATE_ID, AD_UNIT_ID,
                 new MainActivity.AdSohListener(){
                     @Override
                     public void callback( ){
-                        adapter.notifyDataSetChanged();
+                        //adapter.notifyDataSetChanged();
                     }
                 } );
-        nativeAdManager.initAd();
+        nativeAdManager.appendAdList();
 
         // Specify a linear layout manager.
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -70,12 +83,29 @@ public class MainActivity extends AppCompatActivity {
         // Specify an adapter.
         mRecyclerView.setAdapter(adapter);
 
+        addMoreBtn.setOnClickListener(new View.OnClickListener(){
+             @Override
+             public void onClick(View v) {
+                 //Toast.makeText(MainActivity.this, "addMoreBtn", Toast.LENGTH_SHORT).show();
+                 addMenuItems( 10 );
+                 adapter.notifyDataSetChanged();
+             }
+
+        });
+
+        refreshRenderdMore.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "refreshRenderdMore", Toast.LENGTH_SHORT).show();
+            }
+
+        });
     }
 
-    private void addMenuItems() {
+    private void addMenuItems( int count ) {
 
-        for (int i = 0; i < 30; ++i) {
-            mRecyclerViewItems.add( new MenuItem( i + "" ) );
+        for (int i = 0; i < count ; ++i) {
+            mRecyclerViewItems.add( new MenuItem( mRecyclerViewItems.size() + "" ) );
         }
     }
     /**
@@ -106,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
                     final CardView cardView = (CardView) findViewById(R.id.ad_card_view);
                     final int adWidth = cardView.getWidth() - cardView.getPaddingLeft()
                             - cardView.getPaddingRight();
+                    System.out.println("adWidth=" + adWidth );
+
                     AdSize adSize = new AdSize((int) (adWidth / scale), NATIVE_EXPRESS_AD_HEIGHT);
                     adView.setAdSize(adSize);
                     adView.setAdUnitId(AD_UNIT_ID);
@@ -127,8 +159,7 @@ public class MainActivity extends AppCompatActivity {
             //throw new ClassCastException("Expected item at index " + index + " to be a Native" + " Express ad.");
             return;
         }
-
-        final NativeExpressAdView adView = (NativeExpressAdView) item;
+        final NativeExpressAdView adView = new NativeExpressAdView(MainActivity.this);
 
         // Set an AdListener on the NativeExpressAdView to wait for the previous Native Express ad
         // to finish loading before loading the next ad in the items list.
@@ -153,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Load the Native Express ad.
         adView.loadAd(new AdRequest.Builder().build());
+
     }
 
     public interface AdSohListener {
