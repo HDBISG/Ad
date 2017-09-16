@@ -105,6 +105,9 @@ public class NativeAdManager {
             AdItem adItem =  adItemList.get( i );
 
             if( adItem.isRenderd ) {
+
+                System.out.println("refreshRenderdAd= " + i );
+
                 switch (adItem.adType) {
                     case NativeTemplate:
                         new RefreshNativeTemplate().refreshRendered( i );
@@ -188,7 +191,14 @@ public class NativeAdManager {
 
 
         final NativeExpressAdView adView = new NativeExpressAdView( mContext );
+       /* final float scale = MainActivity.this.getResources().getDisplayMetrics().density;
+        // Set the ad size and ad unit ID for each Native Express ad in the items list.
 
+        final NativeExpressAdView adView =
+                (NativeExpressAdView) mRecyclerViewItems.get( 3 );
+        final CardView cardView = (CardView) findViewById(R.id.ad_card_view);
+        final int adWidth = cardView.getWidth() - cardView.getPaddingLeft()
+                - cardView.getPaddingRight();*/
         int adWidth = 736;
 
         final float scale = mContext.getResources().getDisplayMetrics().density;

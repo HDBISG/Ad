@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 new MainActivity.AdSohListener(){
                     @Override
                     public void callback( ){
-                        //adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
                     }
                 } );
         nativeAdManager.appendAdList();
@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         refreshRenderdMore.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "refreshRenderdMore", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "refreshRenderdMore", Toast.LENGTH_SHORT).show();
+                nativeAdManager.refreshRenderdAd();
             }
 
         });
