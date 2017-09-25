@@ -196,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
         Point size = new Point();
         display.getSize(size);
 
-        // 20 is margin between recycleView and screen
-        int adWidth = size.x - 20;
+        // 30 is margin between recycleView and screen
+        int adWidth = size.x - 30;
         return adWidth;
     }
 
