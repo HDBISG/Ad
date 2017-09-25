@@ -1,11 +1,13 @@
 package org.soundofhope.ad;
 
+import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         // DFP
         nativeAdManager = new NativeAdManager( this,"name",true, true
-                , null, DFP_AD_UNIT_ID, SIMPLE_TEMPLATE_ID, AD_UNIT_ID,
+                , null, DFP_AD_UNIT_ID, SIMPLE_TEMPLATE_ID, AD_UNIT_ID, getAdWidth(),
                 new MainActivity.AdSohListener(){
                     @Override
                     public void callback( ){
@@ -186,6 +188,17 @@ public class MainActivity extends AppCompatActivity {
         // Load the Native Express ad.
         adView.loadAd(new AdRequest.Builder().build());
 
+    }
+
+    public int getAdWidth() {
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        // 20 is margin between recycleView and screen
+        int adWidth = size.x - 20;
+        return adWidth;
     }
 
     public interface AdSohListener {

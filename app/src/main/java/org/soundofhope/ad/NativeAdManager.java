@@ -50,6 +50,8 @@ public class NativeAdManager {
 
     private String SIMPLE_TEMPLATE_ID = "";
 
+    private static int adWidth;
+
     MainActivity.AdSohListener adSohListener = null;
 
     static int m = 30;
@@ -62,6 +64,7 @@ public class NativeAdManager {
     public NativeAdManager(Context mContext, String name, boolean nctaEnabled
             , boolean refreshEnabled, Enum backfillType
             , String adUnitDFP, String simpleTemplateId, String adUnitAdMod
+            , int adWidth
             , MainActivity.AdSohListener adSohListener ) {
 
         adItemList.clear();
@@ -71,6 +74,8 @@ public class NativeAdManager {
         this.DFP_AD_UNIT_ID = adUnitDFP;
 
         this.adSohListener = adSohListener;
+
+        NativeAdManager.adWidth = adWidth;
 
     }
 
