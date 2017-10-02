@@ -50,6 +50,8 @@ public class NativeAdManager {
 
     private String SIMPLE_TEMPLATE_ID = "";
 
+    private String adUnitAdMod = "";
+
     private static int adWidth;
 
     MainActivity.AdSohListener adSohListener = null;
@@ -72,6 +74,7 @@ public class NativeAdManager {
         this.mContext = mContext;
         this.SIMPLE_TEMPLATE_ID = simpleTemplateId;
         this.DFP_AD_UNIT_ID = adUnitDFP;
+        this.adUnitAdMod = adUnitAdMod;
 
         this.adSohListener = adSohListener;
 
@@ -212,7 +215,7 @@ public class NativeAdManager {
 
         AdSize adSize = new AdSize((int) (adWidth / scale), MainActivity.NATIVE_EXPRESS_AD_HEIGHT);
         adView.setAdSize(adSize);
-        adView.setAdUnitId( MainActivity.AD_UNIT_ID);
+        adView.setAdUnitId( adUnitAdMod );
 
         // Set an AdListener on the NativeExpressAdView to wait for the previous Native Express ad
         // to finish loading before loading the next ad in the items list.

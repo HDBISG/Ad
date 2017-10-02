@@ -38,11 +38,11 @@ public class MainActivity extends AppCompatActivity {
     public static final int NATIVE_EXPRESS_AD_HEIGHT = 150;
 
     // The Native Express ad unit ID.
-    public static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1072772517";
+    private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/1072772517";
 
-    public static final String DFP_AD_UNIT_ID = "/6499/example/native";
+    private static final String DFP_AD_UNIT_ID = "/6499/example/native";
 
-    public static final String SIMPLE_TEMPLATE_ID = "10104090";
+    private static final String SIMPLE_TEMPLATE_ID = "10104090";
 
     // List of Native Express ads and MenuItems that populate the RecyclerView.
     public final List<Object> mRecyclerViewItems = new ArrayList<>();
